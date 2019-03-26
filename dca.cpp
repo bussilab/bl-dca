@@ -25,6 +25,7 @@ unsigned nt2index(char nucleotide){
   if(nucleotide=='C' || nucleotide=='c') return 2;
   if(nucleotide=='G' || nucleotide=='g') return 3;
   if(nucleotide=='-') return 4;
+  assert(0);
 }
 
 class histo{
