@@ -1,5 +1,6 @@
 ## BOLTZMANN LEARNING CODE
-Code dca.cpp (c++ language) implements a parallelized sthocastic gradient descent procedure adopted to solve the direct coupling analysis inverse Potts problem on RNA families.
+Code dca.cpp (c++ language) implements a parallelized sthocastic gradient descent procedure adopted to solve the direct coupling analysis inverse Potts problem on RNA families. It should be compiled with a C++11 supporting compiler. Recent GCC versions support C++11 by default, whereas older version
+require `-std=c++11` or `-std=c++0x` flag.
 
 ### EXECUTION
 Script run.sh must be executed. It requires two arguments: 
