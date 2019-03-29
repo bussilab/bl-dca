@@ -96,8 +96,8 @@ int main(int argc,char*argv[]){
 	std::vector<histo> f(len);
 	std::vector<histo> new_f(len);
 	//RANDOM NUMBERS 
-	std::random_device rd {}; 
-	std::mt19937 g{rd()}; 
+	//std::random_device rd {}; 
+	std::mt19937 g{rank}; 
    	std::uniform_int_distribution<int> unif(0,seqsize-1);
 	std::uniform_int_distribution<int> kind(0,4);
 	std::uniform_real_distribution<double> rando(0.0,1.0);
