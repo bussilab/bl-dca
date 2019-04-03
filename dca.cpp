@@ -44,6 +44,8 @@ int main(int argc,char*argv[]){
 	int rank,np;
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	MPI_Comm_size(MPI_COMM_WORLD,&np);
+        std::vector<double> reduce_buffer1;
+        std::vector<double> reduce_buffer2;
 	double  l, sim_thresh; 
 	unsigned iold, inew, jold;
    	std::ifstream input(argv[1]);
@@ -96,8 +98,8 @@ int main(int argc,char*argv[]){
 	std::vector<histo> f(len);
 	std::vector<histo> new_f(len);
 	//RANDOM NUMBERS 
-	std::random_device rd {}; 
-	std::mt19937 g{rd()}; 
+	//std::random_device rd {}; 
+	std::mt19937 g{rank}; 
    	std::uniform_int_distribution<int> unif(0,seqsize-1);
 	std::uniform_int_distribution<int> kind(0,4);
 	std::uniform_real_distribution<double> rando(0.0,1.0);
@@ -164,11 +166,24 @@ int main(int argc,char*argv[]){
 						}		
 				}
 			//AVERAGE OF PARAMETERS FROM ALL PROCESSORS
+                        reduce_buffer1.resize(5*len);
 			for(unsigned in=0;in<len;in++)
-				MPI_Allreduce(&h[in].count[0],&new_h[in].count[0],5,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+                                for(unsigned k=0;k<5;k++) reduce_buffer1[in*5+k]=h[in].count[k];
+
+                        MPI_Allreduce(MPI_IN_PLACE,reduce_buffer1.data(),5*len,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+			for(unsigned in=0;in<len;in++)
+                                for(unsigned k=0;k<5;k++) new_h[in].count[k]=reduce_buffer1[in*5+k];
 				
+                        reduce_buffer2.resize(25*len*len);
 			for(unsigned in=0;in<len;in++)for(unsigned jn=0;jn<len;jn++)
-				MPI_Allreduce(&J[in*len+jn].counts[0][0],&new_J[in*len+jn].counts[0][0],25,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);	
+                                for(unsigned k=0;k<5;k++) for(unsigned l=0;l<5;l++)
+                                  reduce_buffer2[in*25*len+jn*25+k*5+l]=J[in*len+jn].counts[k][l];
+
+                        MPI_Allreduce(MPI_IN_PLACE,reduce_buffer2.data(),25*len*len,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+			for(unsigned in=0;in<len;in++)for(unsigned jn=0;jn<len;jn++)
+                                for(unsigned k=0;k<5;k++) for(unsigned l=0;l<5;l++)
+                                  new_J[in*len+jn].counts[k][l]=reduce_buffer2[in*25*len+jn*25+k*5+l];
+
 			
 			for(unsigned in=0;in<len;in++)for(unsigned i=0;i<5;i++){
 				h[in].count[i]=new_h[in].count[i]/(double)np;
